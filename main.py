@@ -20,6 +20,22 @@ class Quiz:
         return user_answer == self.answer
 
 
+def create_default_quizzes():
+    """기본 퀴즈 5개를 만들어 리스트로 돌려준다."""
+    return [
+        Quiz('x = "3" 일 때 type(x)의 결과는?',
+             ["int", "str", "bool", "list"], 2),
+        Quiz('fruits = ["사과", "배", "귤", "감"] 일 때 fruits[2]는?',
+             ["배", "사과", "귤", "감"], 3),
+        Quiz("파이썬에서 '같은지 비교'하는 기호는?",
+             ["==", "=", "!=", "=>"], 1),
+        Quiz("조건이 끝날 때까지 몇 번 돌지 모를 때 쓰는 반복문은?",
+             ["for", "if", "def", "while"], 4),
+        Quiz("원격 저장소를 처음 통째로 내려받는 Git 명령은?",
+             ["push", "pull", "clone", "checkout"], 3),
+    ]
+
+
 def get_number(prompt, min_value, max_value):
     """min_value~max_value 사이의 정수를 올바르게 입력받을 때까지 묻는다."""
     while True:
