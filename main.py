@@ -123,6 +123,19 @@ def add_quiz(quizzes):
     quizzes.append(Quiz(question, choices, answer))
     print("\n✅ 퀴즈가 추가되었습니다!\n")
 
+
+def show_quiz_list(quizzes):
+    """등록된 퀴즈의 번호와 문제를 보여준다."""
+    if not quizzes:
+        print("\n⚠️ 등록된 퀴즈가 없습니다.\n")
+        return
+
+    print(f"\n📋 등록된 퀴즈 목록 (총 {len(quizzes)}개)\n")
+    print("-" * 40)
+    for number, quiz in enumerate(quizzes, start=1):
+        print(f"[{number}] {quiz.question}")
+    print("-" * 40 + "\n")
+
     
 def main():
     """메뉴를 반복해서 보여주고, 선택에 따라 기능을 실행한다."""
@@ -138,7 +151,7 @@ def main():
             elif choice == 2:
                 add_quiz(quizzes)
             elif choice == 3:
-                print("퀴즈 목록 (준비 중)")
+                show_quiz_list(quizzes)
             elif choice == 4:
                 print("점수 확인 (준비 중)")
             elif choice == 5:
