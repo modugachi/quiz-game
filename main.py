@@ -99,11 +99,35 @@ def play_quiz(quizzes):
     print("=" * 40 + "\n")
     return score
 
+
+def get_text(prompt):
+    """빈 문자열이 아닌 글자를 입력받을 때까지 묻는다."""
+    while True:
+        text = input(prompt).strip()
+        if text:
+            return text
+        print("⚠️ 입력이 비어 있습니다. 내용을 입력하세요.")
+
+
+def add_quiz(quizzes):
+    """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가한다."""
+    print("\n📌 새로운 퀴즈를 추가합니다.\n")
+    question = get_text("문제를 입력하세요: ")
+
+    choices = []
+    for number in range(1, 5):
+        choices.append(get_text(f"선택지 {number}: "))
+
+    answer = get_number("정답 번호 (1-4): ", 1, 4)
+
+    quizzes.append(Quiz(question, choices, answer))
+    print("\n✅ 퀴즈가 추가되었습니다!\n")
+
     
 def main():
     """메뉴를 반복해서 보여주고, 선택에 따라 기능을 실행한다."""
     quizzes = create_default_quizzes()
-    
+
     try:
         while True:
             show_menu()
@@ -112,7 +136,7 @@ def main():
             if choice == 1:
                 play_quiz(quizzes)
             elif choice == 2:
-                print("퀴즈 추가 (준비 중)")
+                add_quiz(quizzes)
             elif choice == 3:
                 print("퀴즈 목록 (준비 중)")
             elif choice == 4:
