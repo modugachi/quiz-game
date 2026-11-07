@@ -47,7 +47,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| OS | Ubuntu on WSL (버전: `{{OS_NAME}}`) |
+| OS | Ubuntu on WSL (버전: `Ubuntu 26.04.1 LTS`) |
 | 에디터 | VS Code (WSL 연결) |
 | Python | 3.14.4 |
 | Git | 2.53.0 |
@@ -643,7 +643,26 @@ git log --oneline --graph
 ```
 
 ```text
-{{GIT_LOG}}
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+|\  
+| * 164ec6b Feat: 퀴즈 출제 기능 구현
+|/  
+* c223716 Feat: 기본 퀴즈 5개 추가
+* 77646f2 Feat: Quiz 클래스 추가
+* 99eb4b5 Feat: 공통 입력·예외 처리 함수 구현
+* 8355508 Feat: 메뉴 출력과 종료 기능 구현
+* 6974e89 Docs: 프로젝트 초기 설정과 README 뼈대 추가
 ```
 
 ### 11-6. clone / pull 실습
