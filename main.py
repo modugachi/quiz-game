@@ -136,10 +136,31 @@ def show_quiz_list(quizzes):
         print(f"[{number}] {quiz.question}")
     print("-" * 40 + "\n")
 
+
+def update_best_score(best_score, score):
+    """새 점수가 최고 점수보다 높으면 갱신해서 돌려준다."""
+    if score is None:  # 퀴즈가 없어서 풀지 못한 경우
+        return best_score
+
+    if best_score is None or score > best_score:
+        print("🎉 새로운 최고 점수입니다!\n")
+        return score
+
+    return best_score
+
+
+def show_score(best_score):
+    """최고 점수를 보여준다."""
+    if best_score is None:
+        print("\n⚠️ 아직 퀴즈를 풀지 않았습니다. 먼저 퀴즈를 풀어보세요.\n")
+    else:
+        print(f"\n🏆 최고 점수: {best_score}점\n")
+
     
 def main():
     """메뉴를 반복해서 보여주고, 선택에 따라 기능을 실행한다."""
     quizzes = create_default_quizzes()
+    best_score = None  # 아직 퀴즈를 풀지 않았으면 None
 
     try:
         while True:
@@ -147,19 +168,20 @@ def main():
             choice = get_number("선택: ", 1, 5)
 
             if choice == 1:
-                play_quiz(quizzes)
+                score = play_quiz(quizzes)
+                best_score = update_best_score(best_score, score)
             elif choice == 2:
                 add_quiz(quizzes)
             elif choice == 3:
                 show_quiz_list(quizzes)
             elif choice == 4:
-                print("점수 확인 (준비 중)")
+                show_score(best_score)
             elif choice == 5:
                 print("프로그램을 종료합니다.")
                 break
     except (KeyboardInterrupt, EOFError):
         print("\n입력이 중단되어 프로그램을 안전하게 종료합니다.")
-
+        
 
 if __name__ == "__main__":
     main()
