@@ -1,3 +1,11 @@
+import json
+import os
+
+# 데이터 파일은 main.py 가 있는 폴더(프로젝트 루트)의 state.json 에 저장한다.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATE_FILE = os.path.join(BASE_DIR, "state.json")
+
+
 class Quiz:
     """퀴즈 1개를 표현하는 클래스 (문제, 선택지 4개, 정답 번호 1~4)."""
 
@@ -16,6 +24,28 @@ class Quiz:
     def is_correct(self, user_answer):
         """사용자가 입력한 번호가 정답이면 True, 아니면 False."""
         return user_answer == self.answer
+
+    def to_dict(self):
+        """JSON 으로 저장하기 위해 딕셔너리로 바꾼다."""
+        return {
+            "question": self.question,
+            "choices": self.choices,
+            "answer": self.answer,
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        """저장된 딕셔너리를 Quiz 객체로 되돌린다. 형식이 틀리면 ValueError."""
+        question = data["question"]
+        choices = data["choices"]
+        answer = data["answer"]
+        if not isinstance(question, str) or not question.strip():
+            raise ValueError("question 형식 오류")
+        if not isinstance(choices, list) or len(choices) != 4:
+            raise ValueError("choices 는 4개여야 합니다")
+        if not isinstance(answer, int) or not 1 <= answer <= 4:
+            raise ValueError("answer 는 1~4 여야 합니다")
+        return cls(question, choices, answer)
 
 
 def create_default_quizzes():
@@ -72,6 +102,37 @@ class QuizGame:
         self.quizzes = create_default_quizzes()  # 퀴즈 목록
         self.best_score = None  # 최고 점수 (아직 풀지 않았으면 None)
 
+    def save(self):
+        """퀴즈 목록과 최고 점수를 state.json 에 저장한다."""
+        data = {
+            "quizzes": [quiz.to_dict() for quiz in self.quizzes],
+            "best_score": self.best_score,
+        }
+        try:
+            with open(STATE_FILE, "w", encoding="utf-8") as file:
+                json.dump(data, file, ensure_ascii=False, indent=4)
+        except OSError:
+            print("⚠️ 저장 중 오류가 발생했습니다. 파일 권한을 확인하세요.")
+
+    def load(self):
+        """state.json 을 읽어 온다. 파일이 없거나 손상돼도 실행 가능해야 한다."""
+        if not os.path.exists(STATE_FILE):
+            return "🆕 저장된 데이터가 없어 기본 퀴즈로 시작합니다."
+
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as file:
+                data = json.load(file)
+            self.quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
+            self.best_score = data.get("best_score")
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
+            self.quizzes = create_default_quizzes()
+            self.best_score = None
+            self.save()
+            return "⚠️ 저장 파일이 손상되어 기본 퀴즈로 복구했습니다."
+
+        score_text = "없음" if self.best_score is None else f"{self.best_score}점"
+        return f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})"
+
     def show_menu(self):
         """메뉴를 화면에 출력한다."""
         print("=" * 40)
@@ -113,13 +174,14 @@ class QuizGame:
         self.update_best_score(score)
 
     def update_best_score(self, score):
-        """새 점수가 최고 점수보다 높으면 갱신한다."""
+        """새 점수가 최고 점수보다 높으면 갱신하고 저장한다."""
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             print("🎉 새로운 최고 점수입니다!\n")
+            self.save()
 
     def add_quiz(self):
-        """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가한다."""
+        """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가하고 저장한다."""
         print("\n📌 새로운 퀴즈를 추가합니다.\n")
         question = get_text("문제를 입력하세요: ")
 
@@ -130,6 +192,7 @@ class QuizGame:
         answer = get_number("정답 번호 (1-4): ", 1, 4)
 
         self.quizzes.append(Quiz(question, choices, answer))
+        self.save()
         print("\n✅ 퀴즈가 추가되었습니다!\n")
 
     def show_quiz_list(self):
@@ -152,7 +215,9 @@ class QuizGame:
             print(f"\n🏆 최고 점수: {self.best_score}점\n")
 
     def run(self):
-        """메뉴를 반복해서 보여주고, 선택에 따라 기능을 실행한다."""
+        """저장된 데이터를 불러온 뒤, 메뉴를 반복하며 기능을 실행한다."""
+        print(self.load())
+
         try:
             while True:
                 self.show_menu()
@@ -171,6 +236,8 @@ class QuizGame:
                     break
         except (KeyboardInterrupt, EOFError):
             print("\n입력이 중단되어 프로그램을 안전하게 종료합니다.")
+
+        self.save()  # 종료 전에 한 번 더 저장
 
 
 def main():
