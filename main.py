@@ -1,3 +1,25 @@
+
+
+class Quiz:
+    """퀴즈 1개를 표현하는 클래스 (문제, 선택지 4개, 정답 번호 1~4)."""
+
+    def __init__(self, question, choices, answer):
+        self.question = question
+        self.choices = choices
+        self.answer = answer  # 1~4 중 하나의 번호
+
+    def show(self):
+        """문제와 선택지를 화면에 출력한다."""
+        print(self.question)
+        print()
+        for number, choice in enumerate(self.choices, start=1):
+            print(f"{number}. {choice}")
+
+    def is_correct(self, user_answer):
+        """사용자가 입력한 번호가 정답이면 True, 아니면 False."""
+        return user_answer == self.answer
+
+
 def get_number(prompt, min_value, max_value):
     """min_value~max_value 사이의 정수를 올바르게 입력받을 때까지 묻는다."""
     while True:
