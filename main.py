@@ -1,3 +1,25 @@
+def get_number(prompt, min_value, max_value):
+    """min_value~max_value 사이의 정수를 올바르게 입력받을 때까지 묻는다."""
+    while True:
+        text = input(prompt).strip()
+
+        if text == "":
+            print("⚠️ 입력이 비어 있습니다. 숫자를 입력하세요.")
+            continue
+
+        try:
+            number = int(text)
+        except ValueError:
+            print(f"⚠️ 잘못된 입력입니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
+            continue
+
+        if number < min_value or number > max_value:
+            print(f"⚠️ 잘못된 입력입니다. {min_value}-{max_value} 사이의 숫자를 입력하세요.")
+            continue
+
+        return number
+
+
 def show_menu():
     """메뉴를 화면에 출력한다."""
     print("=" * 40)
@@ -13,23 +35,24 @@ def show_menu():
 
 def main():
     """메뉴를 반복해서 보여주고, 선택에 따라 기능을 실행한다."""
-    while True:
-        show_menu()
-        choice = input("선택: ").strip()
+    try:
+        while True:
+            show_menu()
+            choice = get_number("선택: ", 1, 5)
 
-        if choice == "1":
-            print("퀴즈 풀기 (준비 중)")
-        elif choice == "2":
-            print("퀴즈 추가 (준비 중)")
-        elif choice == "3":
-            print("퀴즈 목록 (준비 중)")
-        elif choice == "4":
-            print("점수 확인 (준비 중)")
-        elif choice == "5":
-            print("프로그램을 종료합니다.")
-            break
-        else:
-            print("⚠️ 잘못된 입력입니다. 1-5 사이의 숫자를 입력하세요.")
+            if choice == 1:
+                print("퀴즈 풀기 (준비 중)")
+            elif choice == 2:
+                print("퀴즈 추가 (준비 중)")
+            elif choice == 3:
+                print("퀴즈 목록 (준비 중)")
+            elif choice == 4:
+                print("점수 확인 (준비 중)")
+            elif choice == 5:
+                print("프로그램을 종료합니다.")
+                break
+    except (KeyboardInterrupt, EOFError):
+        print("\n입력이 중단되어 프로그램을 안전하게 종료합니다.")
 
 
 if __name__ == "__main__":
