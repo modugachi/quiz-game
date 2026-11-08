@@ -49,7 +49,7 @@
 |---|---|
 | OS | Ubuntu on WSL (버전: `Ubuntu 26.04.1 LTS`) |
 | 에디터 | VS Code (WSL 연결) |
-| Python | 3.14.4 |
+| Python | 필요 버전: 3.10 이상 (현재 3.14.4) |
 | Git | 2.53.0 |
 | 외부 라이브러리 | 없음 (`json`, `os` 표준 라이브러리만 사용) |
 
@@ -62,6 +62,8 @@ git config --list
 ```
 
 ## 4. 실행 방법
+
+Python **3.10 이상**과 Git이 필요하다. 외부 라이브러리는 설치하지 않아도 된다.
 
 **처음 받을 때 (clone)**
 
@@ -79,8 +81,9 @@ git pull
 python3 main.py
 ```
 
-- 첫 실행에서는 `state.json`이 없어서 기본 퀴즈 5개로 시작하고, 퀴즈를 풀거나 추가하면 파일이 만들어진다.
+- 첫 실행에서는 `state.json`이 없어서 기본 퀴즈 5개로 시작하고, 첫 실행 후 종료하면 `state.json`이 만들어진다.
 - 메뉴에서 번호(1~5)를 입력해 기능을 선택한다.
+- `python` 명령이 있는 환경이면 `python main.py`로도 실행할 수 있다.
 
 ## 5. 기능 목록
 
@@ -102,7 +105,8 @@ quiz-game/
 ├── README.md            # 이 문서
 ├── .gitignore           # Git이 추적하지 않을 파일 목록
 └── docs/
-    └── screenshots/     # 실행 화면 캡처
+    ├── clone-practice.md    # clone/pull 실습 기록
+    └── screenshots/         # 실행 화면 캡처
 ```
 
 **main.py 안의 구성**
@@ -161,12 +165,12 @@ quiz-game/
 | 빈 입력 (그냥 Enter) | 안내 문구 출력 후 다시 입력받음 | `get_number`, `get_text` |
 | 숫자가 아닌 입력 (`abc`) | `ValueError`를 잡아 안내 후 다시 입력받음 | `get_number` |
 | 범위 밖 숫자 (`9`, `0`) | 안내 문구 출력 후 다시 입력받음 | `get_number` |
-| `Ctrl+C` (`KeyboardInterrupt`) | 안내 문구 출력 후 안전 종료 | `QuizGame.run` |
-| 입력 스트림 종료 (`Ctrl+D`, `EOFError`) | 안내 문구 출력 후 안전 종료 | `QuizGame.run` |
+| `Ctrl+C` (`KeyboardInterrupt`) | 안내 문구 출력 후 저장하고 안전 종료 | `QuizGame.run` |
+| 입력 스트림 종료 (`Ctrl+D`, `EOFError`) | 안내 문구 출력 후 저장하고 안전 종료 | `QuizGame.run` |
 | `state.json`이 없음 | 기본 퀴즈 5개로 시작 | `QuizGame.load` |
-| `state.json`이 손상됨 | 안내 후 기본 퀴즈로 복구하고 다시 저장 | `QuizGame.load` |
-| 퀴즈가 하나도 없음 | 안내 문구 출력 후 메뉴로 복귀 | `play_quiz`, `show_quiz_list` |
-| 아직 퀴즈를 풀지 않음 | 안내 문구 출력 후 메뉴로 복귀 | `show_score` |
+| `state.json`이 손상됨 (JSON 문법 오류, 퀴즈 형식 오류, 최고 점수가 정수가 아니거나 0~100 범위 밖) | 안내 후 기본 퀴즈로 복구하고 다시 저장 | `QuizGame.load`, `Quiz.from_dict` |
+| 퀴즈가 하나도 없음 | 안내 문구 출력 후 메뉴로 복귀 | `QuizGame.play_quiz`, `QuizGame.show_quiz_list` |
+| 아직 퀴즈를 풀지 않음 | 안내 문구 출력 후 메뉴로 복귀 | `QuizGame.show_score` |
 
 ## 9. main.py 전체 코드
 
@@ -216,7 +220,7 @@ class Quiz:
             raise ValueError("question 형식 오류")
         if not isinstance(choices, list) or len(choices) != 4:
             raise ValueError("choices 는 4개여야 합니다")
-        if not isinstance(answer, int) or not 1 <= answer <= 4:
+        if type(answer) is not int or not 1 <= answer <= 4:  # bool(True) 제외
             raise ValueError("answer 는 1~4 여야 합니다")
         return cls(question, choices, answer)
 
@@ -295,8 +299,14 @@ class QuizGame:
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as file:
                 data = json.load(file)
-            self.quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
-            self.best_score = data.get("best_score")
+            quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
+            best_score = data.get("best_score")
+            # 최고 점수는 None 이거나 0~100 사이의 정수여야 한다.
+            if best_score is not None and (type(best_score) is not int
+                                           or not 0 <= best_score <= 100):
+                raise ValueError("best_score 형식 오류")
+            self.quizzes = quizzes
+            self.best_score = best_score
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
             self.quizzes = create_default_quizzes()
             self.best_score = None
@@ -347,14 +357,14 @@ class QuizGame:
         self.update_best_score(score)
 
     def update_best_score(self, score):
-        """새 점수가 최고 점수보다 높으면 갱신하고 저장한다."""
+        """새 점수가 최고 점수보다 높으면 갱신한다."""
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             print("🎉 새로운 최고 점수입니다!\n")
             self.save()
 
     def add_quiz(self):
-        """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가하고 저장한다."""
+        """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가한다."""
         print("\n📌 새로운 퀴즈를 추가합니다.\n")
         question = get_text("문제를 입력하세요: ")
 
@@ -461,6 +471,7 @@ correct_count += 1              # 꺼내서 1을 더한 뒤 다시 담는다
 - `list`는 **번호**(0부터)로, `dict`는 **이름표**로 꺼낸다. `fruits[2]`는 세 번째 값이다.
 - `input()`의 결과는 **항상 `str`**이다. 숫자로 쓰려면 `int()`로 바꿔야 한다.
 - `=`는 값을 **담는** 기호이고, `==`는 **같은지 비교**하는 기호이다.
+- `bool`은 `int`의 한 종류라서 `isinstance(True, int)`가 `True`이다. 그래서 `from_dict`와 `load`에서는 `type(값) is not int`로 **정확히 `int`인지** 확인한다.
 
 **스스로 점검:** 변수를 왜 쓰는가? `list`와 `dict`는 값을 꺼내는 방법이 어떻게 다른가? 키보드로 `3`을 입력하면 어떤 자료형으로 받는가?
 
@@ -474,7 +485,7 @@ if choice == 1:
 elif choice == 2:
     self.add_quiz()
 else:
-    ...
+    ...   # (실제 run()에는 else 없이 elif로 5개를 구분)
 ```
 
 **스스로 점검:** `elif`와 `else`는 언제 실행되는가? `if`를 여러 번 쓰는 것과 `elif`로 잇는 것은 무엇이 다른가?
@@ -568,6 +579,7 @@ with open(STATE_FILE, "r", encoding="utf-8") as file:     # 열기 (읽기 모�
 **JSON**은 데이터를 글자 형태로 저장하는 표준 형식이다. 파이썬의 `dict`, `list`와 모양이 거의 같고, 구조가 있는 데이터를 그대로 저장하고 불러올 수 있으며, 다른 프로그램과 언어도 읽을 수 있어서 데이터 저장에 쓴다.
 
 - `Quiz` 객체는 JSON으로 바로 저장되지 않아서 `to_dict()`로 딕셔너리로 바꿔 저장하고, 읽을 때 `from_dict()`로 객체로 되돌린다.
+- JSON 문법이 맞아도 **값이 규칙에 어긋날 수 있다**(예: `answer`가 9, `best_score`가 `"abc"`). 그래서 불러올 때 값의 형식과 범위까지 검사하고, 어긋나면 기본 데이터로 복구한다.
 
 **스스로 점검:** 파일을 열고 읽고 쓰는 기본 과정을 말해 보라. JSON을 왜 쓰는가? `with`를 쓰면 무엇이 좋은가?
 
@@ -585,7 +597,7 @@ except ValueError:
 
 | 예외 | 언제 발생하나 |
 |---|---|
-| `ValueError` | 형태가 틀린 값을 변환할 때 (`int("abc")`) |
+| `ValueError` | 형태가 틀린 값을 변환할 때 (`int("abc")`), 저장 데이터의 값이 규칙에 어긋날 때 |
 | `json.JSONDecodeError` | JSON 문법이 틀린 파일을 읽을 때 |
 | `KeyboardInterrupt` | `Ctrl+C`를 눌렀을 때 |
 | `EOFError` | 입력 스트림이 끝났을 때 (`Ctrl+D`) |
@@ -631,12 +643,12 @@ git merge <브랜치이름>              # 작업을 main에 합치기
 | 접두어 | 의미 | 예 |
 |---|---|---|
 | `Feat:` | 기능 추가 | `Feat: 퀴즈 출제 기능 구현` |
-| `Fix:` | 오류 수정 | `Fix: 점수 계산 오류 수정` |
+| `Fix:` | 오류 수정 | `Fix: state.json 최고 점수 형식 검증 추가` |
 | `Docs:` | 문서 | `Docs: README 실행 방법 추가` |
 | `Refactor:` | 구조 개선 | `Refactor: QuizGame 클래스로 책임 분리` |
 | `Merge:` | 병합 | `Merge: 퀴즈 풀기 기능 병합` |
 
-### 11-5. 커밋 이력
+### 11-5. 커밋 이력 (작성 시점 기준)
 
 ```bash
 git log --oneline --graph
@@ -665,6 +677,8 @@ git log --oneline --graph
 * 6974e89 Docs: 프로젝트 초기 설정과 README 뼈대 추가
 ```
 
+> 위 이력은 이 README를 작성한 시점의 기록이다. 최종 이력은 아래 [12장](#12-실행-화면)의 `git_log.png`와 GitHub의 커밋 페이지에서 확인할 수 있다.
+
 ### 11-6. clone / pull 실습
 
 - [x] 저장소를 `git clone`으로 별도 폴더에 복제했다.
@@ -687,6 +701,18 @@ git pull                # 복제본에서 올린 커밋을 가져옴
 ```
 
 결과: `pull`로 커밋 `29cde26 Docs: clone 실습 기록 추가`가 내려와 `docs/clone-practice.md`가 생겼다.
+
+### 11-7. Git 기초 명령어 7종 사용 기록
+
+| 명령어 | 사용한 곳 |
+|---|---|
+| `git init` | 프로젝트 시작 시 저장소 초기화 (명령 기록: `docs/screenshots/init.png`) |
+| `git add` / `git commit` | 모든 기능 커밋 (11-5 이력) |
+| `git push` | 커밋을 GitHub에 업로드 |
+| `git checkout` | `git checkout -b feature/play-quiz`로 브랜치 생성 후 `main`으로 복귀 |
+| `git merge` | `Merge: 퀴즈 풀기 기능 병합` (11-5 이력의 브랜치 그래프) |
+| `git clone` | `quiz-game-clone` 폴더에 복제 (11-6) |
+| `git pull` | 복제본에서 올린 커밋을 원래 폴더에서 가져옴 (11-6) |
 
 ## 12. 실행 화면
 
@@ -726,6 +752,10 @@ git pull                # 복제본에서 올린 커밋을 가져옴
 
 ![git log --oneline --graph](docs/screenshots/git_log.png)
 
+### git 명령어 사용 기록 (init 등)
+
+![git 명령어 사용 기록](docs/screenshots/init.png)
+
 ### git clone 실행
 
 ![git clone 실행](docs/screenshots/clone.png)
@@ -742,5 +772,6 @@ git pull                # 복제본에서 올린 커밋을 가져옴
 - [x] `git log --oneline --graph` 결과 스크린샷
 - [x] 퀴즈 5개 이상, 클래스 2개 이상, 커밋 10개 이상
 - [x] 브랜치 생성과 병합 1회 이상
+- [x] Git 기초 명령어 7종(`init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone`) 사용 기록
 - [x] `clone`과 `pull` 각 1회 이상
 - [x] README의 자리표시를 모두 실제 값으로 교체
