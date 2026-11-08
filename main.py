@@ -43,7 +43,7 @@ class Quiz:
             raise ValueError("question 형식 오류")
         if not isinstance(choices, list) or len(choices) != 4:
             raise ValueError("choices 는 4개여야 합니다")
-        if not isinstance(answer, int) or not 1 <= answer <= 4:
+        if type(answer) is not int or not 1 <= answer <= 4:  # bool(True) 제외
             raise ValueError("answer 는 1~4 여야 합니다")
         return cls(question, choices, answer)
 
@@ -122,8 +122,14 @@ class QuizGame:
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as file:
                 data = json.load(file)
-            self.quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
-            self.best_score = data.get("best_score")
+            quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
+            best_score = data.get("best_score")
+            # 최고 점수는 None 이거나 0~100 사이의 정수여야 한다.
+            if best_score is not None and (type(best_score) is not int
+                                           or not 0 <= best_score <= 100):
+                raise ValueError("best_score 형식 오류")
+            self.quizzes = quizzes
+            self.best_score = best_score
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
             self.quizzes = create_default_quizzes()
             self.best_score = None
