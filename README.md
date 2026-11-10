@@ -18,6 +18,9 @@
 11. [Git 정리](#11-git-정리)
 12. [실행 화면](#12-실행-화면)
 13. [제출물 체크리스트](#13-제출물-체크리스트)
+14. [성능 분석 (퀴즈 1000개 이상)](#14-성능-분석-퀴즈-1000개-이상)
+15. [백업과 복구 절차](#15-백업과-복구-절차)
+16. [요구 변경 시 수정 위치](#16-요구-변경-시-수정-위치)
 
 ---
 
@@ -27,7 +30,9 @@
 - **구성:** `Quiz`(퀴즈 1개)와 `QuizGame`(게임 전체) 두 개의 클래스로 역할을 나눴다.
 - **데이터 영속성:** 퀴즈 목록과 최고 점수를 JSON 파일(`state.json`)에 저장해서, 프로그램을 껐다 켜도 유지된다.
 - **Git 기록:** 기능 단위로 커밋하고, 브랜치를 나눠 작업한 뒤 병합하며, GitHub에 저장소를 공개했다.
-- **외부 라이브러리 없이** 파이썬 표준 라이브러리(`json`, `os`)만 사용한다.
+- **안전한 저장:** 저장 전에 백업(`state.json.bak`)을 만들고, 파일이 손상되면 백업으로 자동 복구한다. ([15장](#15-백업과-복구-절차))
+- **성능 확인:** 퀴즈가 1,000개 이상일 때의 시간·메모리를 `benchmark.py`로 측정했다. ([14장](#14-성능-분석-퀴즈-1000개-이상))
+- **외부 라이브러리 없이** 파이썬 표준 라이브러리(`json`, `os`, `shutil`)만 사용한다.
 
 ## 2. 퀴즈 주제 선정 이유
 
@@ -51,7 +56,7 @@
 | 에디터 | VS Code (WSL 연결) |
 | Python | 필요 버전: 3.10 이상 (현재 3.14.4) |
 | Git | 2.53.0 |
-| 외부 라이브러리 | 없음 (`json`, `os` 표준 라이브러리만 사용) |
+| 외부 라이브러리 | 없음 (`json`, `os`, `shutil` 표준 라이브러리만 사용) |
 
 환경 확인 명령:
 
@@ -84,6 +89,18 @@ python3 main.py
 - 첫 실행에서는 `state.json`이 없어서 기본 퀴즈 5개로 시작하고, 첫 실행 후 종료하면 `state.json`이 만들어진다.
 - 메뉴에서 번호(1~5)를 입력해 기능을 선택한다.
 - `python` 명령이 있는 환경이면 `python main.py`로도 실행할 수 있다.
+- **실행이 안 될 때 진단:** `python3 --version`으로 3.10 이상인지 확인하고, `ls`로 `main.py`가 있는 폴더인지 확인한다.
+- **정상 실행 예시 (첫 실행):**
+
+```text
+🆕 저장된 데이터가 없어 기본 퀴즈로 시작합니다.
+========================================
+      🎯 나만의 퀴즈 게임 🎯
+========================================
+1. 퀴즈 풀기
+...
+선택:
+```
 
 ## 5. 기능 목록
 
@@ -101,7 +118,9 @@ python3 main.py
 ```
 quiz-game/
 ├── main.py              # 프로그램 전체 (실행 파일)
+├── benchmark.py         # 퀴즈 1000개 이상 성능 측정 (14장)
 ├── state.json           # 퀴즈 목록과 최고 점수 (실행하면 생성, Git에는 올리지 않음)
+├── state.json.bak       # 직전 정상 데이터의 백업 (자동 생성, Git에는 올리지 않음)
 ├── README.md            # 이 문서
 ├── .gitignore           # Git이 추적하지 않을 파일 목록
 └── docs/
@@ -114,11 +133,13 @@ quiz-game/
 | 이름 | 종류 | 역할 |
 |---|---|---|
 | `Quiz` | 클래스 | 퀴즈 1개(문제, 선택지 4개, 정답)를 표현. `show`, `is_correct`, `to_dict`, `from_dict` |
-| `QuizGame` | 클래스 | 게임 전체를 관리. 메뉴, 풀기, 추가, 목록, 점수, 저장, 불러오기 |
+| `QuizGame` | 클래스 | 게임 전체를 관리. 메뉴(`show_menu`, `run`), 풀기(`play_quiz`), 추가(`add_quiz`), 목록(`show_quiz_list`), 점수(`show_score`, `update_best_score`), 저장·복구(`save`, `load`, `recover`) |
 | `create_default_quizzes()` | 함수 | 기본 퀴즈 5개를 만들어 리스트로 돌려줌 |
 | `get_number()` | 함수 | 범위 안의 정수를 올바르게 입력받을 때까지 묻는 공통 입력 함수 |
 | `get_text()` | 함수 | 빈 글자가 아닌 입력을 받을 때까지 묻는 함수 |
 | `main()` | 함수 | `QuizGame`을 만들어 실행 |
+
+**역할을 나눈 이유:** 입력 검증(`get_number`, `get_text`), 게임 진행(`QuizGame`의 메뉴·풀기·추가), 데이터 입출력(`save`, `load`)을 서로 다른 곳에 두면, 한 부분을 바꿔도 다른 부분이 영향을 덜 받는다. 어디를 고치면 되는지는 [16장](#16-요구-변경-시-수정-위치)에 정리했다.
 
 ## 7. 데이터 파일 설명 (state.json)
 
@@ -129,6 +150,8 @@ quiz-game/
 | 인코딩 | UTF-8 (`ensure_ascii=False`라서 한글이 그대로 저장됨) |
 | 저장 시점 | 퀴즈 추가 직후, 최고 점수 갱신 직후, 프로그램 종료 직전 |
 | 불러오는 시점 | 프로그램 시작 시 |
+| 저장 순서 | 퀴즈 추가 → 임시 파일(`.tmp`)에 쓰기 → 기존 정상 파일을 `.bak`으로 백업 → 임시 파일을 `state.json`으로 교체 |
+| 백업 파일 | `state.json.bak` (직전 정상 데이터), 손상된 파일은 `state.json.corrupt`로 보관 |
 
 **필드 구조**
 
@@ -155,7 +178,7 @@ quiz-game/
 }
 ```
 
-**`state.json`을 Git에 올리지 않는 이유:** 실행할 때마다 바뀌는 데이터라서 커밋 이력이 지저분해지기 때문이다. 대신 이 문서에 구조를 적어 두었고, 처음 실행하면 기본 퀴즈로 자동 생성된다.
+**`state.json`, `state.json.bak`, `state.json.corrupt`, `state.json.tmp`를 Git에 올리지 않는 이유:** 실행할 때마다 바뀌는 데이터라서 커밋 이력이 지저분해지기 때문이다. 대신 이 문서에 구조를 적어 두었고, 처음 실행하면 기본 퀴즈로 자동 생성된다. `.gitignore`에는 `state.json*` 한 줄로 모두 제외했다.
 
 ## 8. 입력·예외 처리 기준
 
@@ -165,10 +188,11 @@ quiz-game/
 | 빈 입력 (그냥 Enter) | 안내 문구 출력 후 다시 입력받음 | `get_number`, `get_text` |
 | 숫자가 아닌 입력 (`abc`) | `ValueError`를 잡아 안내 후 다시 입력받음 | `get_number` |
 | 범위 밖 숫자 (`9`, `0`) | 안내 문구 출력 후 다시 입력받음 | `get_number` |
-| `Ctrl+C` (`KeyboardInterrupt`) | 안내 문구 출력 후 저장하고 안전 종료 | `QuizGame.run` |
+| `Ctrl+C` (`KeyboardInterrupt`) | 안내 문구 출력 후 저장하고 안전 종료 (저장 확인: `python3 -m json.tool state.json`) | `QuizGame.run` |
 | 입력 스트림 종료 (`Ctrl+D`, `EOFError`) | 안내 문구 출력 후 저장하고 안전 종료 | `QuizGame.run` |
 | `state.json`이 없음 | 기본 퀴즈 5개로 시작 | `QuizGame.load` |
-| `state.json`이 손상됨 (JSON 문법 오류, 퀴즈 형식 오류, 최고 점수가 정수가 아니거나 0~100 범위 밖) | 안내 후 기본 퀴즈로 복구하고 다시 저장 | `QuizGame.load`, `Quiz.from_dict` |
+| `state.json`이 손상됨 (JSON 문법 오류, 퀴즈 형식 오류, 최고 점수가 정수가 아니거나 0~100 범위 밖) | 손상 파일을 `state.json.corrupt`로 보관하고 **백업(`.bak`)으로 복구**, 백업도 없거나 손상이면 기본 퀴즈로 복구 후 다시 저장 | `QuizGame.load`, `QuizGame.recover`, `Quiz.from_dict` |
+| 저장 중 오류 (권한·디스크 공간 부족) | 안내 문구 출력 후 계속 실행. 종료 시 한 번 더 저장을 시도함 ([15-4](#15-4-저장이-실패할-때)) | `QuizGame.save` |
 | 퀴즈가 하나도 없음 | 안내 문구 출력 후 메뉴로 복귀 | `QuizGame.play_quiz`, `QuizGame.show_quiz_list` |
 | 아직 퀴즈를 풀지 않음 | 안내 문구 출력 후 메뉴로 복귀 | `QuizGame.show_score` |
 
@@ -177,10 +201,18 @@ quiz-game/
 ```python
 import json
 import os
+import shutil
 
 # 데이터 파일은 main.py 가 있는 폴더(프로젝트 루트)의 state.json 에 저장한다.
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATE_FILE = os.path.join(BASE_DIR, "state.json")
+BACKUP_FILE = STATE_FILE + ".bak"      # 직전 정상 데이터의 백업
+CORRUPT_FILE = STATE_FILE + ".corrupt"  # 손상된 파일을 원인 분석용으로 보관
+TMP_FILE = STATE_FILE + ".tmp"          # 저장 도중에만 잠깐 쓰는 임시 파일
+
+# 저장 파일을 읽다가 발생할 수 있는 오류 모음 (파일 문제, JSON 문법, 형식 오류)
+LOAD_ERRORS = (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError,
+               AttributeError)
 
 
 class Quiz:
@@ -280,16 +312,45 @@ class QuizGame:
         self.best_score = None  # 최고 점수 (아직 풀지 않았으면 None)
 
     def save(self):
-        """퀴즈 목록과 최고 점수를 state.json 에 저장한다."""
+        """퀴즈 목록과 최고 점수를 state.json 에 안전하게 저장한다.
+
+        1) 임시 파일(state.json.tmp)에 먼저 쓴다.
+        2) 기존 state.json 이 정상이면 state.json.bak 으로 백업한다.
+        3) 임시 파일을 state.json 으로 교체한다. (저장 도중 꺼져도 원본이 깨지지 않는다)
+        """
         data = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
             "best_score": self.best_score,
         }
         try:
-            with open(STATE_FILE, "w", encoding="utf-8") as file:
+            with open(TMP_FILE, "w", encoding="utf-8") as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)
+            self.backup_current_file()
+            os.replace(TMP_FILE, STATE_FILE)
         except OSError:
-            print("⚠️ 저장 중 오류가 발생했습니다. 파일 권한을 확인하세요.")
+            print("⚠️ 저장 중 오류가 발생했습니다. 파일 권한과 디스크 공간을 확인하세요.")
+
+    def backup_current_file(self):
+        """현재 state.json 이 정상일 때만 state.json.bak 으로 복사해 둔다."""
+        if not os.path.exists(STATE_FILE):
+            return
+        try:
+            self.read_state(STATE_FILE)  # 손상된 파일이 정상 백업을 덮어쓰지 않게 검사
+            shutil.copy2(STATE_FILE, BACKUP_FILE)
+        except LOAD_ERRORS:
+            pass
+
+    def read_state(self, path):
+        """path 의 JSON 을 읽어 (퀴즈 목록, 최고 점수)를 돌려준다. 형식이 틀리면 예외."""
+        with open(path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+        quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
+        best_score = data.get("best_score")
+        # 최고 점수는 None 이거나 0~100 사이의 정수여야 한다.
+        if best_score is not None and (type(best_score) is not int
+                                       or not 0 <= best_score <= 100):
+            raise ValueError("best_score 형식 오류")
+        return quizzes, best_score
 
     def load(self):
         """state.json 을 읽어 온다. 파일이 없거나 손상돼도 실행 가능해야 한다."""
@@ -297,24 +358,35 @@ class QuizGame:
             return "🆕 저장된 데이터가 없어 기본 퀴즈로 시작합니다."
 
         try:
-            with open(STATE_FILE, "r", encoding="utf-8") as file:
-                data = json.load(file)
-            quizzes = [Quiz.from_dict(item) for item in data["quizzes"]]
-            best_score = data.get("best_score")
-            # 최고 점수는 None 이거나 0~100 사이의 정수여야 한다.
-            if best_score is not None and (type(best_score) is not int
-                                           or not 0 <= best_score <= 100):
-                raise ValueError("best_score 형식 오류")
-            self.quizzes = quizzes
-            self.best_score = best_score
-        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
-            self.quizzes = create_default_quizzes()
-            self.best_score = None
-            self.save()
-            return "⚠️ 저장 파일이 손상되어 기본 퀴즈로 복구했습니다."
+            self.quizzes, self.best_score = self.read_state(STATE_FILE)
+        except LOAD_ERRORS:
+            return self.recover()
 
         score_text = "없음" if self.best_score is None else f"{self.best_score}점"
         return f"📂 저장된 데이터를 불러왔습니다. (퀴즈 {len(self.quizzes)}개, 최고점수 {score_text})"
+
+    def recover(self):
+        """손상된 state.json 을 처리한다: 백업으로 복구, 안 되면 기본 퀴즈로 초기화."""
+        # 1) 손상된 파일은 지우지 않고 .corrupt 로 옮겨 둔다. (원인 분석용)
+        try:
+            os.replace(STATE_FILE, CORRUPT_FILE)
+        except OSError:
+            pass
+
+        # 2) 백업이 정상이면 백업으로 복구한다.
+        if os.path.exists(BACKUP_FILE):
+            try:
+                self.quizzes, self.best_score = self.read_state(BACKUP_FILE)
+                self.save()
+                return "⚠️ 저장 파일이 손상되어 백업(state.json.bak)으로 복구했습니다."
+            except LOAD_ERRORS:
+                pass
+
+        # 3) 백업도 없거나 손상됐으면 기본 퀴즈로 초기화한다.
+        self.quizzes = create_default_quizzes()
+        self.best_score = None
+        self.save()
+        return "⚠️ 저장 파일이 손상되어 기본 퀴즈로 복구했습니다."
 
     def show_menu(self):
         """메뉴를 화면에 출력한다."""
@@ -357,14 +429,14 @@ class QuizGame:
         self.update_best_score(score)
 
     def update_best_score(self, score):
-        """새 점수가 최고 점수보다 높으면 갱신한다."""
+        """새 점수가 최고 점수보다 높으면 갱신하고 저장한다."""
         if self.best_score is None or score > self.best_score:
             self.best_score = score
             print("🎉 새로운 최고 점수입니다!\n")
             self.save()
 
     def add_quiz(self):
-        """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가한다."""
+        """문제, 선택지 4개, 정답 번호를 입력받아 퀴즈 목록에 추가하고 저장한다."""
         print("\n📌 새로운 퀴즈를 추가합니다.\n")
         question = get_text("문제를 입력하세요: ")
 
@@ -552,6 +624,7 @@ q1 = Quiz("파이썬에서 '같은지 비교'하는 기호는?", ["==", "=", "!=
 
 - **왜 쓰는가:** 퀴즈 1개는 문제, 선택지, 정답이 항상 한 세트라서 하나로 묶어야 관리하기 쉽다.
 - **역할 분리:** `Quiz`는 퀴즈 1개를, `QuizGame`은 게임 전체(메뉴, 목록, 점수, 저장)를 맡는다.
+- **재사용:** `Quiz`는 화면·파일을 모르는 독립된 클래스라서, 다른 프로그램(예: 문제 은행, 단어 암기 앱)에서 그대로 가져다 쓸 수 있다. `benchmark.py`도 `Quiz`와 `QuizGame`을 그대로 가져와 사용한다.
 
 **스스로 점검:** `__init__`는 언제 실행되는가? `self`는 무엇을 가리키는가? 속성과 메서드의 차이는?
 
@@ -647,13 +720,22 @@ git merge <브랜치이름>              # 작업을 main에 합치기
 | `Refactor:` | 구조 개선 | `Refactor: QuizGame 클래스로 책임 분리` |
 | `Merge:` | 병합 | `Merge: 퀴즈 풀기 기능 병합` |
 
-### 11-5. 커밋 이력 (작성 시점 기준)
+**커밋 단위 기준:** 한 커밋에는 **하나의 목적**만 담는다. 예를 들어 "퀴즈 목록 기능" 커밋에는 `show_quiz_list` 메서드와 메뉴 연결만 넣고, README 설명은 따로 `Docs:` 커밋으로 나눈다.
+
+### 11-5. 커밋 이력
 
 ```bash
 git log --oneline --graph
 ```
 
 ```text
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
 * 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
 * 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
 * 29cde26 Docs: clone 실습 기록 추가
@@ -676,7 +758,7 @@ git log --oneline --graph
 * 6974e89 Docs: 프로젝트 초기 설정과 README 뼈대 추가
 ```
 
-> 위 이력은 이 README를 작성한 시점의 기록이다. 최종 이력은 아래 [12장](#12-실행-화면)의 `git_log.png`와 GitHub의 커밋 페이지에서 확인할 수 있다.
+전체 커밋은 GitHub에서도 볼 수 있다: <https://github.com/modugachi/quiz-game/commits/main>
 
 ### 11-6. clone / pull 실습
 
@@ -774,3 +856,151 @@ git pull                # 복제본에서 올린 커밋을 가져옴
 - [x] Git 기초 명령어 7종(`init`, `add`, `commit`, `push`, `pull`, `checkout`, `clone`) 사용 기록
 - [x] `clone`과 `pull` 각 1회 이상
 - [x] README의 자리표시를 모두 실제 값으로 교체
+- [x] 퀴즈 1000개 이상 성능 측정과 결과 요약 ([14장](#14-성능-분석-퀴즈-1000개-이상))
+- [x] 백업 파일 생성과 복구 절차 ([15장](#15-백업과-복구-절차))
+- [x] 요구 변경 시 수정 위치 정리 ([16장](#16-요구-변경-시-수정-위치))
+
+## 14. 성능 분석 (퀴즈 1000개 이상)
+
+### 14-1. 측정 목적과 방법
+
+퀴즈가 많아져도 저장, 불러오기, 목록 출력이 실용적인 시간 안에 끝나는지 확인한다. 측정 프로그램은 `benchmark.py`이고, 표준 라이브러리(`time`, `tracemalloc`, `tempfile`)만 사용한다.
+
+| 항목 | 내용 |
+|---|---|
+| 측정 대상 | 퀴즈 1,000개 / 5,000개 / 10,000개 |
+| 측정 항목 | 저장(`save`), 불러오기(`load`), 목록 출력(`show_quiz_list`), 파일 크기, 불러올 때 최대 메모리 |
+| 측정 방식 | 각 항목을 5번 반복해 **중앙값**을 사용 (한 번의 우연한 느려짐을 제외) |
+| 메모리 | `tracemalloc`으로 불러오는 동안의 최대 사용량을 따로 측정 (시간 측정에는 영향 없음) |
+| 안전장치 | 임시 폴더에서만 측정해서 실제 `state.json`은 건드리지 않음 |
+
+실행 방법:
+
+```bash
+python3 benchmark.py
+```
+
+### 14-2. 측정 결과
+
+| 퀴즈 수 | 저장 (ms) | 불러오기 (ms) | 목록 출력 (ms) | 파일 크기 (KB) | 불러올 때 최대 메모리 (MB) |
+|---:|---:|---:|---:|---:|---:|
+| 1,000 | 12.1 | 2.4 | 0.4 | 260 | 1.15 |
+| 5,000 | 54.8 | 11.5 | 1.8 | 1303 | 5.33 |
+| 10,000 | 111.8 | 24.1 | 3.6 | 2606 | 10.54 |
+
+퀴즈 수가 10배(1,000 → 10,000개)가 될 때: 저장 9.2배, 불러오기 10.0배, 목록 출력 9.6배, 메모리 9.2배 증가
+
+> 측정 환경: Ubuntu on WSL, Python 3.14.4. 숫자는 컴퓨터 성능에 따라 달라지지만, **퀴즈 수와 시간·메모리가 비례하는 모양**은 같다.
+
+### 14-3. 해석
+
+| 동작 | 시간 복잡도 | 이유 |
+|---|---|---|
+| 저장 | O(n) | 퀴즈 n개를 모두 딕셔너리로 바꿔(`to_dict`) 파일에 쓰고, 백업 전에 기존 파일을 한 번 검사(읽기)함 |
+| 불러오기 | O(n) | 퀴즈 n개를 하나씩 읽고 형식을 검사(`from_dict`)함 |
+| 목록 출력 | O(n) | `for`로 퀴즈를 하나씩 출력함 |
+| 메모리 | O(n) | 모든 퀴즈를 리스트로 메모리에 올려 두므로 퀴즈 수에 비례함 |
+
+- **결론:** 시간과 메모리 모두 퀴즈 수에 **거의 비례**(선형)해서 늘어나고, 퀴즈 1,000개 수준에서는 사람이 느낄 만한 지연이 없다.
+- **병목:** 퀴즈 풀기는 문제마다 사람이 답을 입력하므로, 실제로 오래 걸리는 것은 컴퓨터의 처리가 아니라 입력 시간이다.
+- **한계와 개선 방향:** 저장할 때마다 파일 **전체**를 다시 쓰므로, 퀴즈가 수십만 개 이상으로 늘어나면 변경분만 저장하는 방식(예: SQLite)을 고려한다.
+
+## 15. 백업과 복구 절차
+
+### 15-1. 자동 백업과 복구 동작
+
+| 상황 | 프로그램의 동작 | 화면 문구 |
+|---|---|---|
+| 저장할 때 | 임시 파일에 먼저 쓰고, 기존 정상 파일을 `state.json.bak`으로 백업한 뒤 교체 | (없음) |
+| `state.json`이 없음 | 기본 퀴즈 5개로 시작 | `🆕 저장된 데이터가 없어 기본 퀴즈로 시작합니다.` |
+| `state.json`이 손상됨 + 백업 정상 | 손상 파일을 `state.json.corrupt`로 보관하고 **백업으로 복구** | `⚠️ 저장 파일이 손상되어 백업(state.json.bak)으로 복구했습니다.` |
+| `state.json`이 손상됨 + 백업 없음/손상 | 기본 퀴즈로 초기화하고 다시 저장 | `⚠️ 저장 파일이 손상되어 기본 퀴즈로 복구했습니다.` |
+| 손상된 파일이 있는 채로 저장 | 손상된 파일은 백업하지 않음 (정상 백업을 지키기 위해) | (없음) |
+
+### 15-2. 관련 파일
+
+| 파일 | 역할 | 생성 시점 |
+|---|---|---|
+| `state.json` | 현재 데이터 | 첫 저장 |
+| `state.json.bak` | 직전 정상 데이터의 백업 | 두 번째 저장부터 |
+| `state.json.corrupt` | 손상된 파일 보관 (원인 분석용) | 손상을 발견했을 때 |
+| `state.json.tmp` | 저장 도중에만 쓰는 임시 파일 | 저장하는 동안 |
+
+이 네 파일은 `.gitignore`의 `state.json*` 한 줄로 Git에서 제외한다.
+
+### 15-3. 직접 복구하는 절차
+
+프로그램이 자동으로 복구하지만, 직접 확인하거나 되돌려야 할 때는 아래 순서로 한다.
+
+1. **프로그램을 종료한다.** (메뉴 5번)
+2. **파일 상태를 확인한다.**
+
+```bash
+ls -la state.json*
+```
+
+3. **어느 파일이 정상인지 검사한다.** 오류 없이 내용이 나오면 정상이다.
+
+```bash
+python3 -m json.tool state.json.bak
+```
+
+4. **정상인 백업으로 되돌린다.**
+
+```bash
+cp state.json.bak state.json
+```
+
+5. **프로그램을 실행해 `📂 저장된 데이터를 불러왔습니다.`가 나오는지 확인한다.**
+
+```bash
+python3 main.py
+```
+
+6. **백업도 쓸 수 없으면 초기화한다.** 기본 퀴즈 5개로 새로 시작한다.
+
+```bash
+rm -f state.json state.json.bak state.json.tmp
+```
+
+### 15-4. 저장이 실패할 때
+
+`⚠️ 저장 중 오류가 발생했습니다. 파일 권한과 디스크 공간을 확인하세요.`가 나오는 경우다. 프로그램은 종료되지 않고 계속 실행되며, 종료할 때 저장을 한 번 더 시도한다.
+
+| 확인할 것 | 명령 | 해결 |
+|---|---|---|
+| 폴더에 쓰기 권한이 있는지 | `ls -ld .` | `chmod u+w .` |
+| 디스크 공간이 남았는지 | `df -h .` | 불필요한 파일 삭제 |
+| 파일이 읽기 전용인지 | `ls -l state.json` | `chmod u+w state.json` |
+
+원인을 해결한 뒤 메뉴에서 퀴즈를 추가하거나 정상 종료(메뉴 5번)하면 다시 저장된다.
+
+### 15-5. 한계
+
+- 전원 차단이나 강제 종료(`kill -9`)처럼 프로그램이 정리할 틈이 없는 종료는 막을 수 없다. 다만 임시 파일에 쓴 뒤 교체하는 방식이라 **원본이 반쯤 쓰인 상태로 남을 가능성은 낮고**, 마지막 저장 이후의 변경만 사라진다.
+- 프로그램을 **동시에 두 개** 실행해 같은 `state.json`에 저장하는 경우는 지원하지 않는다. (나중에 저장한 쪽이 덮어쓴다)
+- 백업은 직전 1개만 보관한다. 여러 시점의 이력이 필요하면 Git이나 날짜별 백업을 추가해야 한다.
+
+## 16. 요구 변경 시 수정 위치
+
+요구가 바뀌었을 때 **어디를 고치고 무엇을 함께 확인해야 하는지** 정리했다.
+
+| 요구 변경 | 반드시 고칠 곳 | 함께 확인할 곳 |
+|---|---|---|
+| 점수 계산 방식 변경 (예: 오답 감점) | `QuizGame.play_quiz`의 `score = round(...)` | `update_best_score`, `read_state`의 최고 점수 범위 검사(0~100), 7장 `best_score` 설명 |
+| 선택지 개수 변경 (4개 → 5개) | `Quiz.from_dict`의 `len(choices) != 4`, `QuizGame.add_quiz`의 `range(1, 5)`와 `get_number(..., 1, 4)`, `QuizGame.play_quiz`의 `get_number("정답 입력: ", 1, 4)` | `create_default_quizzes`, 이미 저장된 `state.json`(4개짜리)이 손상으로 처리되는지 |
+| 퀴즈 항목 추가 (예: 해설) | `Quiz.__init__`, `to_dict`, `from_dict`, `QuizGame.add_quiz` | `Quiz.show`, `play_quiz`, 7장 필드 구조, 기존 파일에 항목이 없을 때 기본값 처리 |
+| 저장 형식 변경 (예: CSV) | `QuizGame.save`, `QuizGame.read_state`, `Quiz.to_dict`, `Quiz.from_dict` | `backup_current_file`, `recover`, `STATE_FILE` 이름, `LOAD_ERRORS` |
+| 저장 위치·파일 이름 변경 | `STATE_FILE`, `BACKUP_FILE`, `CORRUPT_FILE`, `TMP_FILE` | `.gitignore`, 6~7장, 15장 |
+| 메뉴 추가 | `QuizGame.show_menu`, `QuizGame.run`의 분기와 `get_number("선택: ", 1, N)`, 새 메서드 | 5장 기능 목록, 12장 스크린샷 |
+| 기본 퀴즈 변경 | `create_default_quizzes` | 2장 퀴즈 표 |
+| 입력 검증 규칙 변경 | `get_number`, `get_text` | 8장 표, 이 함수를 쓰는 모든 메서드 |
+| 최고 점수 대신 기록 목록 저장 | `QuizGame.best_score`, `update_best_score`, `show_score`, `save`, `read_state` | 7장 필드 구조, 15장 복구 동작 |
+
+**변경 후 확인 순서**
+
+1. `python3 main.py`로 실행해 메뉴 → 풀기 → 추가 → 목록 → 점수를 확인한다.
+2. 종료 후 다시 실행해 `📂 저장된 데이터를 불러왔습니다.`가 나오는지 확인한다.
+3. `python3 benchmark.py`로 성능이 크게 나빠지지 않았는지 확인한다.
+4. 기능 단위로 `Feat:` 또는 `Fix:` 커밋을 하고, README를 고쳤다면 `Docs:` 커밋을 따로 남긴다.
+
