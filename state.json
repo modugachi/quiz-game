@@ -1,0 +1,55 @@
+{
+    "quizzes": [
+        {
+            "question": "x = \"3\" 일 때 type(x)의 결과는?",
+            "choices": [
+                "int",
+                "str",
+                "bool",
+                "list"
+            ],
+            "answer": 2
+        },
+        {
+            "question": "fruits = [\"사과\", \"배\", \"귤\", \"감\"] 일 때 fruits[2]는?",
+            "choices": [
+                "배",
+                "사과",
+                "귤",
+                "감"
+            ],
+            "answer": 3
+        },
+        {
+            "question": "파이썬에서 '같은지 비교'하는 기호는?",
+            "choices": [
+                "==",
+                "=",
+                "!=",
+                "=>"
+            ],
+            "answer": 1
+        },
+        {
+            "question": "조건이 끝날 때까지 몇 번 돌지 모를 때 쓰는 반복문은?",
+            "choices": [
+                "for",
+                "if",
+                "def",
+                "while"
+            ],
+            "answer": 4
+        },
+        {
+            "question": "원격 저장소를 처음 통째로 내려받는 Git 명령은?",
+            "choices": [
+                "push",
+                "pull",
+                "clone",
+                "checkout"
+            ],
+            "answer": 3
+        }
+    ],
+    "best_score": 80
+}
