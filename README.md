@@ -526,7 +526,7 @@ if __name__ == "__main__":
 ### 10-1 변수 (Variable)
 
 - **개념:** 값을 저장해 두고 이름으로 다시 꺼내 쓰는 공간
-- **사용 :** 값을 저장해 두었다가 **재사용**하고, 의미 있는 이름을 붙여 코드의 **가독성과 유지보수성**을 높이기 위해 사용.
+- **사용:** 값을 저장해 두었다가 **재사용**하고, 의미 있는 이름을 붙여 코드의 **가독성과 유지보수성**을 높이기 위해 사용.
 ```python
 correct_count = 0               # 정답 개수를 담는 변수
 correct_count += 1              # 꺼내서 1을 더한 뒤 다시 담는다
@@ -590,13 +590,11 @@ choice = get_number("선택: ", 1, 5)              # 부르면 결과가 choice�
 - **왜 쓰는가:** 같은 입력 검사를 메뉴, 정답 입력, 정답 번호 입력에서 모두 재사용하기 위해서다.
 - `def`는 "이런 함수를 만들어 두겠다"는 **등록**이고, 이름 뒤에 `()`를 붙여야 **실행**된다.
 
-**스스로 점검:** 매개변수와 반환값은 각각 무엇인가? `get_number`를 함수로 만든 이유는?
-
 ### 10-6. 클래스와 객체
 
-클래스 (Class): 객체를 만들기 위한 '설계도' 또는 '틀'. **비슷한 특징을 가진 객체들**을 효율적으로 관리하기 위해 사용. cf) Quiz (데이터 양식+전용함수)를 직접 정의
-                관련된 데이터(속성)와 기능(메서드)을 하나의 캡슐로 묶어 관리함으로써 코드 중복을 줄이고 구조화하기 위함
-객체(Object) : q1 = Quiz(...)처럼 실제 값을 채워 넣어 메모리에 생성한 **변수의 실체**
+- 클래스 (Class): 객체를 만들기 위한 '설계도' 또는 '틀'. **비슷한 특징을 가진 객체들**을 효율적으로 관리하기 위해 사용. cf) Quiz (데이터 양식+전용함수)를 직접 정의
+관련된 데이터(속성)와 기능(메서드)을 하나의 캡슐로 묶어 관리함으로써 코드 중복을 줄이고 구조화하기 위함
+- 객체(Object) : q1 = Quiz(...)처럼 실제 값을 채워 넣어 메모리에 생성한 **메모리에 만들어진 데이터 덩어리, 변수는 그 객체를 가리키는 이름표**
 
 ```
 # 1. User라는 설계도(클래스)로 실제 데이터 상자(객체)를 하나 만듦
@@ -636,7 +634,6 @@ my_car.drive()                   # 메서드 호출 -> "소나타가 주행합�
 ### 10-7. 파일 입출력과 JSON
 
 데이터를 파일에 저장하면 프로그램을 꺼도 남는다(**데이터 영속성**). 파일을 다루는 기본 과정은 **열기 → 읽기/쓰기 → 닫기**이다.
-
 ```python
 with open(STATE_FILE, "w", encoding="utf-8") as file:     # 열기 (쓰기 모드)
     json.dump(data, file, ensure_ascii=False, indent=4)   # 쓰기
@@ -663,9 +660,7 @@ with open(STATE_FILE, "r", encoding="utf-8") as file:     # 열기 (읽기 모�
 ### 10-8. 예외 처리 `try / except`
 
 오류가 날 수 있는 코드를 **시도**(`try`)하고, 오류가 나면 프로그램이 죽지 않고 대신 **처리**(`except`)한다.
-실행 중 예상치 못한 오류(예외)가 발생했을 때 프로그램이 강제 종료되는 것을 막고 안전하게 대처하기 위해 사용       
-cf.with + try/except OSError
-
+실행 중 예상치 못한 오류(예외)가 발생했을 때 프로그램이 강제 종료되는 것을 막고 안전하게 대처하기 위해 사용 
 ```python
 try:
     number = int(text)            # "abc"는 숫자로 못 바꿔서 오류가 난다
@@ -680,7 +675,6 @@ except ValueError:
 | `json.JSONDecodeError` | JSON 문법이 틀린 파일을 읽을 때 |
 | `KeyboardInterrupt` | `Ctrl+C`를 눌렀을 때 |
 | `EOFError` | 입력 스트림이 끝났을 때 (`Ctrl+D`) |
-
 
 ## 11. Git 정리
 
@@ -735,6 +729,323 @@ git log --oneline --graph
 ```
 
 ```text
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+|\  
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+|\  
+| * 164ec6b Feat: 퀴즈 출제 기능 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+|\  
+| * 164ec6b Feat: 퀴즈 출제 기능 구현
+|/  
+* c223716 Feat: 기본 퀴즈 5개 추가
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+|\  
+| * 164ec6b Feat: 퀴즈 출제 기능 구현
+|/  
+* c223716 Feat: 기본 퀴즈 5개 추가
+* 77646f2 Feat: Quiz 클래스 추가
+* 99eb4b5 Feat: 공통 입력·예외 처리 함수 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
+* 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
+* 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
+* 461bd2b Docs: README 10-1 설명 단순화
+* 4d56ecf Docs: 최종 git log 스크린샷 갱신
+* fdb5dc1 Docs: README 최종 보완 (명령어 7종 사용 기록, 예외 처리 표 정리)
+* f41d746 Fix: state.json 최고 점수 형식 검증 추가
+* 0c7f367 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 66f76bf Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 5332de2 Docs: README 최종 정리 (실행 화면, clone/pull 실습 기록)
+* 29cde26 Docs: clone 실습 기록 추가
+* 7ef6ad5 Docs: README 최종본 작성
+* 77dcb6a Docs: 실행 화면 스크린샷 추가
+* 2fee20c Fix: state.json을 Git 추적에서 제외
+* 93fcf31 Feat: state.json 저장/불러오기 구현
+* b032049 Refactor: QuizGame 클래스로 책임 분리
+* 0fb4cc9 Feat: 최고 점수 확인 및 갱신 기능 구현
+* b6b9cd3 Feat: 퀴즈 목록 기능 구현
+* 8dc0b4f Feat: 퀴즈 추가 기능 구현
+*   3f4361c Merge: 퀴즈 풀기 기능 병합
+|\  
+| * 164ec6b Feat: 퀴즈 출제 기능 구현
+|/  
+* c223716 Feat: 기본 퀴즈 5개 추가
+* 77646f2 Feat: Quiz 클래스 추가
+* 99eb4b5 Feat: 공통 입력·예외 처리 함수 구현
+* 8355508 Feat: 메뉴 출력과 종료 기능 구현
+:...skipping...
+*   3f78dd0 (HEAD -> main, origin/main, origin/HEAD) Docs: README 내용 보완
+|\  
+| * 03815e7 Update README.md
+* | d572158 Docs:샘플 state.json 추가
+|/  
+* 607495a Docs:성능분석, 백업복구절차, 요구변경영향표 추가
 * 2b735ee Feat: 퀴즈 1000개 이상 성능 측정 스크립트 추가
 * 95eb897 Feat: state.json 백업(.bak)과 손상 시 자동 복구 추가
 * 461bd2b Docs: README 10-1 설명 단순화
@@ -762,6 +1073,7 @@ git log --oneline --graph
 * 99eb4b5 Feat: 공통 입력·예외 처리 함수 구현
 * 8355508 Feat: 메뉴 출력과 종료 기능 구현
 * 6974e89 Docs: 프로젝트 초기 설정과 README 뼈대 추가
+:
 ```
 
 전체 커밋은 GitHub에서도 볼 수 있다: <https://github.com/modugachi/quiz-game/commits/main>
